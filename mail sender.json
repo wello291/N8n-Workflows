@@ -1,0 +1,148 @@
+{
+  "name": "mail sender",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 17,
+              "triggerAtMinute": 7
+            }
+          ]
+        }
+      },
+      "id": "5f8b4e76-1a69-4dc8-9777-7975c850ffc3",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "11hmkLLGXNMJUQstgX9emML66SOqB3Ylnart-TSmiLcE",
+          "mode": "list",
+          "cachedResultName": "tasks",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11hmkLLGXNMJUQstgX9emML66SOqB3Ylnart-TSmiLcE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11hmkLLGXNMJUQstgX9emML66SOqB3Ylnart-TSmiLcE/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "id": "f39118f8-0cec-4354-91ba-e2408a5a1708",
+      "name": "Get row(s) in sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        256,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P8mNVE6IQeyLRmQM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "tasks = []\n\nfor item in _items:\n    task = str(item['json'].get('task') or '').strip()\n    if task:\n        tasks.append(task)\n\ntasks_text = '\\n'.join(tasks)\n\nreturn [{'json': {'tasksText': tasks_text}}]"
+      },
+      "id": "18321cdb-1214-4c16-bd80-cd39b35e3b27",
+      "name": "Code in Python",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "pheleps26@gmail.com",
+        "subject": "tasks",
+        "emailType": "text",
+        "message": "=Dear pheleps,\n\nthis are your tasks.\n{{ $json.tasksText }}\n\nthanks \n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "3578d15b-cdf7-4ce7-bf50-7ea9eaf378cf",
+      "name": "Send a message",
+      "webhookId": "a6166c9c-e3cd-4403-bd6f-00e84880379d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xpvIMcgUfvd0doIM",
+          "name": "Gmail account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "bf1ddfa4-1f55-4eaa-a1dc-443cfa1751a4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "85b91f546adadeff08846460569c01de9a6e5e0f2327c1e36c67a67f6d397001"
+  },
+  "nodeGroups": [],
+  "id": "FT3G6Itsu6WzUmhD",
+  "tags": []
+}

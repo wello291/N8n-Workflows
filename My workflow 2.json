@@ -1,0 +1,348 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "dea9892f-f846-4a52-a3b2-f7421767fe33",
+              "leftValue": "={{ $json['Is Active'][0] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "bbd23f37-a62f-42f6-bd1a-0309978bc5de",
+      "name": "Is Active True?"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1CyXhq3EhVfUTZSY_4jWPIkq9sxSvubb0970pC1vNyo4",
+          "mode": "list",
+          "cachedResultName": "Example 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CyXhq3EhVfUTZSY_4jWPIkq9sxSvubb0970pC1vNyo4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CyXhq3EhVfUTZSY_4jWPIkq9sxSvubb0970pC1vNyo4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.name }}",
+            "Age": "={{ $json.Age }}",
+            "Skills": "={{ $json.Skills }}",
+            "Adress": "={{ $json.Adress }}",
+            "Email": "={{ $json.Email }}",
+            "Active": "={{ $json['Is Active'] }}"
+          },
+          "matchingColumns": [
+            "Name"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Age",
+              "displayName": "Age",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Skills",
+              "displayName": "Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Adress",
+              "displayName": "Adress",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Active",
+              "displayName": "Active",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        672,
+        -96
+      ],
+      "id": "e08a73ce-91b6-4b1c-8a65-7560ebe3752e",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P8mNVE6IQeyLRmQM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1CyXhq3EhVfUTZSY_4jWPIkq9sxSvubb0970pC1vNyo4",
+          "mode": "list",
+          "cachedResultName": "Example 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CyXhq3EhVfUTZSY_4jWPIkq9sxSvubb0970pC1vNyo4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CyXhq3EhVfUTZSY_4jWPIkq9sxSvubb0970pC1vNyo4/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Name",
+              "lookupValue": "={{ $json.name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        672,
+        96
+      ],
+      "id": "2013cdb5-7f05-4ef3-b1a6-d746542b2894",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P8mNVE6IQeyLRmQM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "1CyXhq3EhVfUTZSY_4jWPIkq9sxSvubb0970pC1vNyo4",
+          "mode": "list",
+          "cachedResultName": "Example 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CyXhq3EhVfUTZSY_4jWPIkq9sxSvubb0970pC1vNyo4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CyXhq3EhVfUTZSY_4jWPIkq9sxSvubb0970pC1vNyo4/edit#gid=0"
+        },
+        "startIndex": "={{ $json.row_number }}"
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        896,
+        96
+      ],
+      "id": "7532cfa1-af5d-4e81-8c4b-695dff0970a7",
+      "name": "Delete rows or columns from sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P8mNVE6IQeyLRmQM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "form",
+        "formDescription": "info form",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "name"
+            },
+            {
+              "fieldLabel": "Age",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email"
+            },
+            {
+              "fieldLabel": "Skills",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Php"
+                  },
+                  {
+                    "option": "prog"
+                  },
+                  {
+                    "option": "HTML"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Adress"
+            },
+            {
+              "fieldLabel": "Is Active",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "True"
+                  },
+                  {
+                    "option": "False"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        112,
+        16
+      ],
+      "id": "b31b9888-6772-499c-aa33-a062d8f4703e",
+      "name": "On form submission",
+      "webhookId": "600320ec-4fc6-49df-8dd8-5c0ea65ea16d"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Is Active True?": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Delete rows or columns from sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Is Active True?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1e172ed0-95ee-42c7-add8-8d26cd08949e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "85b91f546adadeff08846460569c01de9a6e5e0f2327c1e36c67a67f6d397001"
+  },
+  "nodeGroups": [],
+  "id": "dsPUJ5qtFifmCItc",
+  "tags": []
+}
