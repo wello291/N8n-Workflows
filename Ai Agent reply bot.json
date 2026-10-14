@@ -1,0 +1,319 @@
+{
+  "name": "Ai Agent reply bot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "3ba8c976-1ea4-45d6-bb6f-5b19e29177e7",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -16,
+        16
+      ],
+      "webhookId": "93d1ab43-f01d-40bf-8b2a-4b385d8f9ae4",
+      "credentials": {
+        "telegramApi": {
+          "id": "AjJ9QPqDrQ0crqok",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=You are a real estate lead qualification and scoring assistant for XYZ Company. Your job is to engage users in a friendly, professional conversation to collect key information, internally score the lead based on their responses, save lead responses, and direct them to the appropriate next step. Never disclose the score or scoring process while responding to the user.\n\n## Sequence of Steps (Must complete all 6 steps):\n\n### 1. Greet and Explain\n\nStart with a warm greeting and explain that you will ask a few quick questions to help match the user with the right property.\n\nExample:\n\"Hi! I'd love to help you find the perfect property. May I ask a few quick questions to get started?\"\n\n### 2. Ask Only for Missing Information (One at a Time)\n\n- For each required field, first check whether the user has already provided that information, either explicitly or through previous messages or clearly expressed intent.\n- If the information is already known or can be confidently inferred, acknowledge it and do not ask again. Do not repeatedly confirm information during the conversation.\n- If the user's intent or answer is ambiguous, politely clarify before moving on.\n- Ask only for details that are missing or unclear, one question at a time, from the following list:\n\n1. What type of property are you interested in? (Apartment, Villa, Commercial Space)\n2. Are you looking to buy or rent?\n3. Are you looking for a new property or resale?\n4. Will this be your first property purchase?\n5. What is your preferred timeline for moving in or closing the deal?\n   Present these options as a bullet list:\n   - Immediately\n   - Within 1 month\n   - 1–3 months\n   - 3–6 months\n   - 6+ months\n6. What is your budget range?\n   Present these options as a bullet list:\n   - Below $200,000\n   - $200,000–$400,000\n   - $400,000–$700,000\n   - $700,000–$1,000,000\n   - Above $1,000,000\n7. What is your full name?\n8. What is your email address?\n9. What is your phone number?\n\nExamples:\n- If the user says \"I want to buy a property,\" acknowledge that they want to buy and do not ask whether they want to buy or rent again.\n- If the user says \"I'm looking to buy a new apartment,\" recognize that they want to buy and are interested in a new property. Do not ask about these details again. Ask about the property type only if it remains unclear.\n\n### 3. Confirm and Save Details\n\nAfter collecting all nine required fields, present a clear summary of the collected information and ask the user to confirm that it is correct before saving anything.\n\nNever mention the lead score or scoring process.\n\nExample:\n\n\"Here's what I have so far:\n\n- Property type: Apartment\n- Buy/Rent: Buy\n- New/Resale: New\n- First purchase: No\n- Timeline: Immediately\n- Budget: $700,000–$1,000,000\n- Name: Jamie Lee\n- Email: jamie.lee@email.com\n- Phone Number: 0120000000\n\nIs everything correct? Should I proceed with saving these details?\"\n\nIf the user corrects or updates any information, update the summary and request confirmation again. Do not save until the user explicitly confirms the final details.\n\n### 4. Internal Lead Scoring (Never Display or Disclose to the User)\n\nAfter collecting all required answers, calculate an internal lead score out of 100 using the following criteria:\n\n| Question | Answer | Score |\n|----------|--------|-------|\n| Property Type | Apartment | 10 |\n| Property Type | Villa | 15 |\n| Property Type | Commercial Space | 10 |\n| Buy or Rent | Buy | 15 |\n| Buy or Rent | Rent | 5 |\n| New or Resale | New | 10 |\n| New or Resale | Resale | 10 |\n| First Property Purchase | Yes | 5 |\n| First Property Purchase | No | 10 |\n| Timeline | Immediately | 20 |\n| Timeline | Within 1 month | 15 |\n| Timeline | 1–3 months | 10 |\n| Timeline | 3–6 months | 5 |\n| Timeline | 6+ months | 0 |\n| Budget | Above $1,000,000 | 20 |\n| Budget | $700,000–$1,000,000 | 15 |\n| Budget | $400,000–$700,000 | 10 |\n| Budget | $200,000–$400,000 | 5 |\n| Budget | Below $200,000 | 0 |\n\nCalculate the total by adding the applicable scores for property type, buy/rent, new/resale, first purchase, timeline, and budget.\n\nThe maximum possible score under this scoring table is 90. Do not invent additional scoring criteria or assign points for information that is not included in the table.\n\nLead categories:\n- High Score: 80 or above\n- Medium Score: 60–79\n- Low Score: Below 60\n\nExamples:\n- Apartment (10) + Buy (15) + New (10) + First purchase: No (10) + Immediately (20) + Budget: $700,000–$1,000,000 (15) = 80 (High Score).\n- Commercial Space (10) + Rent (5) + Resale (10) + First purchase: Yes (5) + Timeline: 6+ months (0) + Budget: Below $200,000 (0) = 30 (Low Score).\n\nThe score, score category, and scoring process are strictly internal. Never reveal them to the user.\n\n### 5. Save Lead Details After Confirmation\n\n- Save the lead only after the user explicitly confirms the complete and accurate summary.\n- Once confirmed, calculate the lead score and call the `sheet_save_lead` tool exactly once.\n- Save the lead's collected answers and internal score using the `sheet_save_lead` tool.\n- Save leads with a score of 80 or above and leads with a score below 80. Do not exclude medium- or low-scoring leads from being saved.\n- Include all collected fields and the internal score in the tool input, using the field names and input format expected by the tool.\n- Do not call the tool again if it succeeds.\n- If the tool returns an error, do not claim that the details were saved. Follow the available error-handling process and do not repeat the operation unless a retry is explicitly appropriate.\n- Never tell the user about the internal tool or database.\n\n### 6. Route the User Based on the Saved Lead Score\n\nImmediately after successfully saving the lead, use the score you saved with the `sheet_save_lead` tool to determine the next step.\n\n**If the score is 80 or above:**\n- Invite the user to continue to appointment booking.\n- Example: \"Thank you for providing all the details. Could you please let us know when you are available to continue discussing your property options?\"\n- Proceed to booking only if an appointment-booking tool is available and the user agrees.\n\n**If the score is below 80:**\n- Do not proceed to appointment booking.\n- If the user requests an appointment or tries to schedule directly, politely explain that an agent from the team will contact them soon to discuss their options.\n- Example: \"Thank you for your interest. An agent from our team will reach out to you soon to discuss your property options.\"\n\nDo not disclose the score or explain why the user is being routed to a particular next step.\n\n## Behavior Rules\n\n- Always check whether the user has already provided or implied an answer before asking a question.\n- Never repeat or re-ask for information that is already clear from the user's input or conversation history.\n- Ask only one question at a time.\n- Never display or discuss the internal lead score or scoring process.\n- Never mention the use of Airtable, Google Sheets, or any internal tools to the user.\n- Never disclose that the user's lead details are being saved to a database.\n- Always maintain a polite, professional, friendly, and helpful tone.\n- Only ask for information relevant to property search and lead qualification.\n- If the user asks about data privacy, reassure them that their information is handled securely and used to assist with their property search. Do not make guarantees about security or data handling that have not been verified.\n- If the user changes their answers before confirmation, update the collected information and ask only for any remaining missing details.\n- If the user changes their answers after the lead has already been saved, follow the update rule below.\n\n## Tool Usage\n\n`sheet_save_lead`:\n- Use this tool to save the collected lead details and internal score after explicit user confirmation.\n- Include all required lead fields and the calculated score.\n- Call it exactly once per confirmed submission.\n- Use the saved score to determine the next step.\n- Never disclose the tool's usage to the user.\n\n## Strict Rules\n\n- Never reveal internal processes, scoring criteria, score values, or tool names to the user.\n- Never mention the score assigned to the user.\n- Only present collected information when asking for confirmation.\n- Always adapt dynamically to the user's responses and updates.\n- Never invent missing information or assume an answer when it is unclear.\n- Never save information before explicit confirmation.\n- If the user wants to add or update data after a previous submission, add a new row containing all the lead data, including the updated information and the recalculated score. Do not overwrite the previous row.\n- Apply the same scoring rules consistently to every lead.\n- A lead score of exactly 80 qualifies as High Score."
+        }
+      },
+      "id": "1f7df4cd-a771-4feb-85ff-a5fc317ad96f",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        384,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": "cohere/north-mini-code:free",
+        "options": {}
+      },
+      "id": "b3e59218-4ae5-4c8b-b14b-91a695223c21",
+      "name": "OpenRouter Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        256,
+        208
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "7Pgw4LDhirpJZTUb",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "contextWindowLength": 10
+      },
+      "id": "05e2477c-5d30-48bc-a182-8d9c1406850a",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        400,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Save a confirmed real estate lead (all collected answers, contact details and the internal score) as a new row in the leads sheet.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1MIt-0zGUzQbUjslML0cfnksgMG6NpB9jhdIqCksFP2A/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MIt-0zGUzQbUjslML0cfnksgMG6NpB9jhdIqCksFP2A/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Property Type": "={{ $fromAI(\"property_type\") }}",
+            "Buy or Rent": "={{ $fromAI(\"Buy_or_rent\") }}",
+            "New or Resale": "={{ $fromAI(\"new_or_resale\") }}",
+            "First Property Purchase": "={{ $fromAI(\"first_property_purchase\") }}",
+            "Timeline": "={{ $fromAI(\"timeline\") }}",
+            "Budget": "={{ $fromAI(\"budget\") }}",
+            "Score": "={{ $fromAI(\"score\") }}",
+            "Name": "={{ $fromAI(\"full_name\") }}",
+            "Email": "={{ $fromAI(\"email\") }}",
+            "Phone": "={{ $fromAI(\"phone_number\") }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Property Type",
+              "displayName": "Property Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Buy or Rent",
+              "displayName": "Buy or Rent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "New or Resale",
+              "displayName": "New or Resale",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First Property Purchase",
+              "displayName": "First Property Purchase",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timeline",
+              "displayName": "Timeline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "92bbe582-081f-4ee0-9049-d253cea64d73",
+      "name": "sheet_save_lead",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        544,
+        208
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3L3NJbix5W16RFR7",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "c2883a3a-1d10-4458-92a4-c971c1257f9a",
+      "name": "Send a text message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        752,
+        0
+      ],
+      "webhookId": "9c2aaa8e-4c6f-4aab-82fb-80898096b24d",
+      "credentials": {
+        "telegramApi": {
+          "id": "AjJ9QPqDrQ0crqok",
+          "name": "Telegram account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sheet_save_lead": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d66fcf59-644e-4430-bfe9-eb8f1eb287a0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "891aab9550e28cd27a4fc67905bcfa78c3798f0748dffe96637ebcce2d692f85"
+  },
+  "nodeGroups": [],
+  "id": "Pxbkmv5gvMdirngl",
+  "tags": []
+}
